@@ -2,7 +2,13 @@
 
 All notable changes to Chassis will be documented in this file.
 
-## [Unreleased]
+## [0.1.8] - 11.08.2026
+
+### Fixed
+
+- `Chassis::VERSION`, `package.json` and the jsDelivr links in the readme now give the current version. The 0.1.7 tag still said 0.1.6. The only code that reads `Chassis::VERSION` is the stylesheet version used when Chassis can't read a file's hash, so no site behaved differently.
+
+## [0.1.7] - 11.06.2026
 
 ### Changed
 
