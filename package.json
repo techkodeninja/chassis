@@ -1,6 +1,6 @@
 {
 	"name": "chassis",
-	"version": "0.1.6",
+	"version": "0.1.8",
 	"private": true,
 	"description": "Builds the Chassis CSS and JavaScript.",
 	"license": "GPL-2.0-or-later",
