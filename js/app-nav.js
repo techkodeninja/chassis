@@ -13,6 +13,7 @@
  *   screens. It toggles `.app-nav__item--open` and keeps `aria-expanded` in sync.
  * - Escape closes the menu and returns focus to the button.
  * - Clicking outside the menu closes it.
+ * - Tabbing out of the menu closes it.
  * - Widening the screen past the mobile breakpoint resets it to closed.
  * - On phones the button hides when you scroll down and comes back when you
  *   scroll up, reach the top or bottom of the page, or tab to it. It toggles
@@ -22,6 +23,9 @@
  * @package Techkodeninja\Chassis
  * @license GPL-2.0-or-later
  */
+
+// Submenu ids, so each toggle can point at its submenu with `aria-controls`.
+let submenuId = 0;
 
 export function appNav( root = document ) {
 	root.querySelectorAll( '.app-nav' ).forEach( ( nav ) => {
@@ -63,7 +67,14 @@ export function appNav( root = document ) {
 			button.type = 'button';
 			button.className = 'app-nav__submenu-toggle';
 			button.textContent = '\u25BE'; // A small down arrow, escaped so it shows on pages that aren't UTF-8.
+
+			if ( ! submenu.id ) {
+				submenu.id = `app-nav-submenu-${ ++submenuId }`;
+			}
+
 			button.setAttribute( 'aria-expanded', 'false' );
+			button.setAttribute( 'aria-haspopup', 'true' );
+			button.setAttribute( 'aria-controls', submenu.id );
 			button.setAttribute( 'aria-label', `Submenu for ${ link.textContent.trim() }` );
 
 			button.addEventListener( 'click', () => {
@@ -81,12 +92,14 @@ export function appNav( root = document ) {
 
 		toggle.addEventListener( 'click', () => setOpen( ! isOpen() ) );
 
-		nav.addEventListener( 'keydown', ( event ) => {
+		// Escape works even with focus outside the nav, as long as the menu
+		// is open; an open submenu closes first, then the menu.
+		document.addEventListener( 'keydown', ( event ) => {
 			if ( 'Escape' !== event.key ) {
 				return;
 			}
 
-			const openItem = event.target.closest( '.app-nav__item--open' );
+			const openItem = nav.contains( event.target ) ? event.target.closest( '.app-nav__item--open' ) : null;
 
 			if ( openItem ) {
 				closeSubmenus();
@@ -94,6 +107,19 @@ export function appNav( root = document ) {
 			} else if ( isOpen() ) {
 				setOpen( false );
 				toggle.focus();
+			}
+		} );
+
+		// Tabbing out of the menu closes it.
+		nav.addEventListener( 'focusout', ( event ) => {
+			if ( nav.contains( event.relatedTarget ) ) {
+				return;
+			}
+
+			closeSubmenus();
+
+			if ( isOpen() ) {
+				setOpen( false );
 			}
 		} );
 

@@ -45,8 +45,6 @@
 
 	// Borders.
 	--border-width:  #{ sizing.$border-width };
-	--border-dotted: var( --border-width ) dotted var( --color-content-border );
-	--border-solid:  var( --border-width ) solid var( --color-content-border );
 	--border-rule:   var( --border-width ) solid var( --color-content-divider );
 	--border-box:        var( --border-width ) #{ design.$box-border-style } var( --color-content-border );
 	--border-box-bottom: var( --border-width ) #{ design.$box-border-bottom-style } var( --color-content-border );
@@ -91,4 +89,8 @@
 	--comments-shadow:  #{ design.$comments-shadow };
 	--comments-gap:      #{ design.$comments-gap };
 	--comments-meta-gap: #{ design.$comments-meta-gap };
+
+	// Menu. The button hides while scrolling down unless `chassis.json`
+	// sets `menu.hide-on-scroll` to `false` (PHP then emits `0`).
+	--menu-hide-on-scroll: 1;
 }

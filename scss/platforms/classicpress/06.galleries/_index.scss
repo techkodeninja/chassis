@@ -8,9 +8,16 @@
 
 @use '../../../02.tools' as ui;
 
-.gallery-columns-2 {
-	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+// A gallery item is a `figure`: no margins, so it fills its grid track.
+.gallery-item {
+	margin: 0;
 }
+
+.gallery-columns-1 {
+	grid-template-columns: repeat( 1, minmax( 0, 1fr ) );
+}
+
+// `.gallery` already defaults to 2 columns, so there is no `-2` rule.
 
 @include ui.up( medium ) {
 	.gallery-columns-3 {

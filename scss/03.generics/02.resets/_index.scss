@@ -25,10 +25,16 @@ body {
 img,
 picture,
 video,
-canvas,
-svg {
+canvas {
 	display: block;
 	height: auto;
+	max-width: 100%;
+}
+
+// Inline icons stay inline: `display: block` would put an SVG in a button
+// label or running text on its own line. (The social menu sets `display:
+// block` on its own icons.)
+svg {
 	max-width: 100%;
 }
 

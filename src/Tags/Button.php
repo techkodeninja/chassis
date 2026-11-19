@@ -13,11 +13,27 @@ use Novaris\Template\Tag\Tag;
 
 class Button extends Tag
 {
-	public function __construct(
-		protected string $label,
-		protected string $url,
-		protected array $modifiers = []
-	) {}
+	/**
+	 * @var string
+	 */
+	protected $label;
+
+	/**
+	 * @var string
+	 */
+	protected $url;
+
+	/**
+	 * @var string[]
+	 */
+	protected $modifiers;
+
+	public function __construct( string $label, string $url, array $modifiers = [] )
+	{
+		$this->label     = $label;
+		$this->url       = $url;
+		$this->modifiers = $modifiers;
+	}
 
 	public function toHtml(): string
 	{

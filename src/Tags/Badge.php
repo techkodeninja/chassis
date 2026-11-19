@@ -13,10 +13,21 @@ use Novaris\Template\Tag\Tag;
 
 class Badge extends Tag
 {
-	public function __construct(
-		protected string $label,
-		protected array $modifiers = []
-	) {}
+	/**
+	 * @var string
+	 */
+	protected $label;
+
+	/**
+	 * @var string[]
+	 */
+	protected $modifiers;
+
+	public function __construct( string $label, array $modifiers = [] )
+	{
+		$this->label     = $label;
+		$this->modifiers = $modifiers;
+	}
 
 	public function toHtml(): string
 	{

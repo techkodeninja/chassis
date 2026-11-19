@@ -12,10 +12,14 @@
 	border-radius: var( --radius );
 	color: var( --color-content-text );
 	cursor: pointer;
+	// Stuck to the top-right corner while the code scrolls underneath:
+	// `absolute` scrolled away with it. The script puts the button first in
+	// the block, so it floats at the top.
+	float: right;
 	font-family: var( --font-family-body );
 	font-size: 0.75rem;
 	padding: var( --space-xs ) var( --space-s );
-	position: absolute;
+	position: sticky;
 	right: var( --space-s );
 	top: var( --space-s );
 }

@@ -6,8 +6,11 @@
 	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "npm run build:css && npm run build:js",
-		"build:css": "sass --no-source-map --style=compressed scss/chassis.scss:dist/chassis.css scss/chassis-classicpress.scss:dist/chassis-classicpress.css",
-		"build:js": "node scripts/build-js.mjs"
+		"build:css": "sass --no-source-map --style=compressed scss/chassis.scss:dist/chassis.css scss/chassis-classicpress.scss:dist/chassis-classicpress.css && node scripts/banner-css.mjs",
+		"build:js": "node scripts/build-js.mjs",
+		"check": "npm run check:version && npm run check:schema",
+		"check:version": "node scripts/check-version.mjs",
+		"check:schema": "node scripts/check-schema.mjs"
 	},
 	"devDependencies": {
 		"sass": "^1.93.3"
