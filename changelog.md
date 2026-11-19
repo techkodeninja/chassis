@@ -2,6 +2,12 @@
 
 All notable changes to Chassis will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING:** the comment and widget classes Chassis itself owns are BEM now, matching the rest of the package (`.entry__title`, `.app-header__inner`). `.comments-title` is `.comments-area__title`, `.comment-list` is `.comments-area__list`, `.comment-avatar` is `.comment__avatar`, `.comments` (the marker custom callbacks add to the `<li>`) is `.comment--callback`, and `.widget-title` is `.widget__title`. The comment classes WordPress itself prints (`.comment-body`, `.comment-meta`, `.comment-metadata`, `.comment-content`, `.comment-awaiting-moderation`, `.comment-form`, `.comment-respond`, `.comment-reply-title`) are unchanged, so the default walker markup keeps its styling. Themes using the old hyphenated names need to update their markup.
+
 ## [0.1.9] - 2026-11-19
 
 ### Fixed

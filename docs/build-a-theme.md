@@ -152,7 +152,7 @@ add_action( 'widgets_init', function () {
 		'name'          => __( 'Primary Sidebar', 'starter' ),
 		'before_widget' => '<section id="%1$s" class="widget %2$s">',
 		'after_widget'  => '</section>',
-		'before_title'  => '<h2 class="widget-title">',
+		'before_title'  => '<h2 class="widget__title">',
 		'after_title'   => '</h2>',
 	] );
 } );
@@ -359,7 +359,7 @@ View the page source and you'll see this, trimmed. Every class follows the same 
 
 		<aside class="app-sidebar" aria-label="Sidebar">
 			<section id="categories-2" class="widget widget_categories">
-				<h2 class="widget-title">Categories</h2>
+				<h2 class="widget__title">Categories</h2>
 				<ul><li><a href="/category/news">News</a></li></ul>
 			</section>
 		</aside>

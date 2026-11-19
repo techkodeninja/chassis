@@ -2,8 +2,13 @@
 /// Comments
 ///
 /// Threaded comments and the comment form, in a box when the theme sets one. Covers the
-/// default markup from `wp_list_comments()` and the `.comments` items that custom
+/// default markup from `wp_list_comments()` and the `.comment--callback` items that custom
 /// callbacks print (a `.comment-meta` header and a `.comment-content` body).
+///
+/// The `.comment-body`, `.comment-meta`, `.comment-metadata`, `.comment-content`, and
+/// `.comment-awaiting-moderation` classes are the ones WordPress's default walker prints,
+/// so they stay exactly as WordPress spells them; only the classes Chassis itself owns
+/// are BEM.
 ///
 /// @group Platforms
 ////
@@ -30,19 +35,19 @@
 	}
 }
 
-.comments-title,
+.comments-area__title,
 .comment-reply-title {
 	font-size: var( --font-size-h3 );
 }
 
-.comment-list,
-.comment-list .children {
+.comments-area__list,
+.comments-area__list .children {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.comment-list {
+.comments-area__list {
 	margin-bottom: var( --space-xl );
 
 	.children {
@@ -51,12 +56,12 @@
 	}
 
 	.comment,
-	.comments {
+	.comment--callback {
 		margin-bottom: var( --space-l );
 	}
 
 	.avatar,
-	.comment-avatar {
+	.comment__avatar {
 		border-radius: var( --radius );
 		float: left;
 		margin-right: var( --space-m );
@@ -64,7 +69,7 @@
 }
 
 .comment-body,
-.comments > .comment-content {
+.comment--callback > .comment-content {
 	border-bottom: var( --border-rule );
 	padding-bottom: var( --space-l );
 }

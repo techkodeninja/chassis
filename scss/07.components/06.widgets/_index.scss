@@ -2,10 +2,10 @@
 /// Widgets
 ///
 /// Sidebar boxes. Novaris's template tags and ClassicPress sidebars both print
-/// `.widget` and `.widget-title`.
+/// `.widget` and `.widget__title`.
 ///
 ///   <div class="widget">
-///     <h3 class="widget-title">Recent Posts</h3>
+///     <h3 class="widget__title">Recent Posts</h3>
 ///     <ul><li><a href="/post">A post</a></li></ul>
 ///   </div>
 ///
@@ -37,7 +37,7 @@
 	}
 }
 
-.widget-title {
+.widget__title {
 	color: var( --color-widget-title );
 	font-size: var( --font-size-h4 );
 	margin-bottom: var( --space-s );

@@ -258,7 +258,7 @@ Themes without `chassis.json` can use the `.app-nav--top` or `.app-nav--bottom` 
 | `.button` · `--primary`, `.buttons` | Outlined / filled button; a wrapping row of buttons |
 | `.section-header` (`__title`, `__description`) | Centered heading block |
 | `.pagination` (`__items`, `__item`, `__anchor`) | Numbered page links. Novaris's default `pagination-items` classes work too |
-| `.widget`, `.widget-title` | Sidebar boxes, as printed by Novaris and ClassicPress |
+| `.widget`, `.widget__title` | Sidebar boxes, as printed by Novaris and ClassicPress |
 | `.code-copy` | The Copy button added to code blocks in post content |
 | `.entry`, `.app-main > article`, `.entry__header`, `__metadata`, `__title`, `__title-anchor`, `__thumbnail`, `__content`, `__more-link`, `__terms` | Posts and pages, in a box that matches the widgets |
 | `.social-menu` | A row of icon links |
