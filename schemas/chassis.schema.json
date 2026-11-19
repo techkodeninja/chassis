@@ -869,7 +869,7 @@
 						},
 						"title": {
 							"type": "object",
-							"description": "Widget titles, `.widget-title`.",
+							"description": "Widget titles, `.widget__title`.",
 							"properties": {
 								"color": {
 									"type": "object",
