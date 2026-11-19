@@ -1,3 +1,4 @@
+/*! Chassis 0.1.8 | GPL-2.0-or-later | https://github.com/techkodeninja/chassis */
 ( function () {
 /**
  * App navigation
@@ -14,6 +15,7 @@
  *   screens. It toggles `.app-nav__item--open` and keeps `aria-expanded` in sync.
  * - Escape closes the menu and returns focus to the button.
  * - Clicking outside the menu closes it.
+ * - Tabbing out of the menu closes it.
  * - Widening the screen past the mobile breakpoint resets it to closed.
  * - On phones the button hides when you scroll down and comes back when you
  *   scroll up, reach the top or bottom of the page, or tab to it. It toggles
@@ -23,6 +25,9 @@
  * @package Techkodeninja\Chassis
  * @license GPL-2.0-or-later
  */
+
+// Submenu ids, so each toggle can point at its submenu with `aria-controls`.
+let submenuId = 0;
 
 function appNav( root = document ) {
 	root.querySelectorAll( '.app-nav' ).forEach( ( nav ) => {
@@ -64,7 +69,14 @@ function appNav( root = document ) {
 			button.type = 'button';
 			button.className = 'app-nav__submenu-toggle';
 			button.textContent = '\u25BE'; // A small down arrow, escaped so it shows on pages that aren't UTF-8.
+
+			if ( ! submenu.id ) {
+				submenu.id = `app-nav-submenu-${ ++submenuId }`;
+			}
+
 			button.setAttribute( 'aria-expanded', 'false' );
+			button.setAttribute( 'aria-haspopup', 'true' );
+			button.setAttribute( 'aria-controls', submenu.id );
 			button.setAttribute( 'aria-label', `Submenu for ${ link.textContent.trim() }` );
 
 			button.addEventListener( 'click', () => {
@@ -82,12 +94,14 @@ function appNav( root = document ) {
 
 		toggle.addEventListener( 'click', () => setOpen( ! isOpen() ) );
 
-		nav.addEventListener( 'keydown', ( event ) => {
+		// Escape works even with focus outside the nav, as long as the menu
+		// is open; an open submenu closes first, then the menu.
+		document.addEventListener( 'keydown', ( event ) => {
 			if ( 'Escape' !== event.key ) {
 				return;
 			}
 
-			const openItem = event.target.closest( '.app-nav__item--open' );
+			const openItem = nav.contains( event.target ) ? event.target.closest( '.app-nav__item--open' ) : null;
 
 			if ( openItem ) {
 				closeSubmenus();
@@ -95,6 +109,19 @@ function appNav( root = document ) {
 			} else if ( isOpen() ) {
 				setOpen( false );
 				toggle.focus();
+			}
+		} );
+
+		// Tabbing out of the menu closes it.
+		nav.addEventListener( 'focusout', ( event ) => {
+			if ( nav.contains( event.relatedTarget ) ) {
+				return;
+			}
+
+			closeSubmenus();
+
+			if ( isOpen() ) {
+				setOpen( false );
 			}
 		} );
 
@@ -173,14 +200,14 @@ function hideOnScroll( nav, toggle, isOpen ) {
  * Adds a Copy button to code blocks in post content, and announces the result
  * to screen readers. Pairs with `scss/07.components/09.code-copy`.
  *
+ * Without the clipboard API (plain `http://` pages, where it is undefined),
+ * it falls back to a temporary textarea and `execCommand`, so the button
+ * still works there.
+ *
  * @package Techkodeninja\Chassis
  */
 
 function codeCopy( root = document ) {
-	if ( ! navigator.clipboard ) {
-		return;
-	}
-
 	root.querySelectorAll( '.entry__content pre, .entry-content pre' ).forEach( ( block ) => {
 		if ( block.dataset.codeCopy ) {
 			return;
@@ -196,23 +223,80 @@ function codeCopy( root = document ) {
 		button.type = 'button';
 		button.className = 'code-copy';
 		button.textContent = 'Copy';
-		button.setAttribute( 'aria-live', 'polite' );
+		button.setAttribute( 'aria-label', 'Copy code' );
+
+		let resetTimer;
 
 		button.addEventListener( 'click', async () => {
+			clearTimeout( resetTimer );
+
 			try {
-				await navigator.clipboard.writeText( text );
+				await copyText( text );
 				button.textContent = 'Copied';
+				announce( 'Copied' );
 			} catch {
 				button.textContent = 'Copy failed';
+				announce( 'Copy failed' );
 			}
 
-			setTimeout( () => {
+			resetTimer = setTimeout( () => {
 				button.textContent = 'Copy';
+				announce( '' );
 			}, 2000 );
 		} );
 
-		block.append( button );
+		// First in the block, so the sticky button sits at the top of it.
+		block.prepend( button );
 	} );
+}
+
+/**
+ * Copies text. Uses the clipboard API when there is one; otherwise a
+ * temporary textarea with `execCommand`, for pages without a secure context.
+ */
+async function copyText( text ) {
+	if ( navigator.clipboard ) {
+		await navigator.clipboard.writeText( text );
+		return;
+	}
+
+	if ( ! document.execCommand ) {
+		throw new Error( 'copy unavailable' );
+	}
+
+	const area = document.createElement( 'textarea' );
+
+	area.value = text;
+	area.setAttribute( 'readonly', '' );
+	area.style.position = 'absolute';
+	area.style.left = '-9999px';
+	document.body.append( area );
+	area.select();
+
+	try {
+		if ( ! document.execCommand( 'copy' ) ) {
+			throw new Error( 'copy failed' );
+		}
+	} finally {
+		area.remove();
+	}
+}
+
+/**
+ * Announces the result to screen readers through one shared live region,
+ * instead of putting `aria-live` on the button itself.
+ */
+let liveRegion;
+
+function announce( message ) {
+	if ( ! liveRegion ) {
+		liveRegion = document.createElement( 'div' );
+		liveRegion.className = 'screen-reader-text';
+		liveRegion.setAttribute( 'aria-live', 'polite' );
+		document.body.append( liveRegion );
+	}
+
+	liveRegion.textContent = message;
 }
 
 appNav();
