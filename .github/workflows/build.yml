@@ -12,14 +12,34 @@ permissions:
   contents: write
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Lint the PHP on the supported floor
+        run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run check
+
   build:
     runs-on: ubuntu-latest
+    # Two pushes to develop close together used to race the bot's dist commit.
+    # Serialize the build job; never cancel one that's mid-commit.
+    concurrency:
+      group: build-dist
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm ci
       - run: npm run build
       - name: Keep the build for review
         if: github.event_name == 'pull_request'
