@@ -12,6 +12,10 @@ body {
 	font-family: var( --font-family-body );
 	font-size: var( --font-size-base );
 	line-height: var( --line-height-base );
+	// `.alignfull` breaks out with `100vw`, which counts the scrollbar: clip
+	// the sideways overflow instead of letting a scrollbar appear. `clip`
+	// doesn't make a scroll container, so sticky positioning still works.
+	overflow-x: clip;
 	overflow-wrap: break-word;
 }
 
@@ -25,6 +29,13 @@ figure,
 table {
 	margin-bottom: var( --space-l );
 	margin-top: 0;
+}
+
+// The browser's default `figure` margins are 40px on each side: reset them,
+// so captioned images and gallery items line up with the text.
+figure {
+	margin-left: 0;
+	margin-right: 0;
 }
 
 hr {

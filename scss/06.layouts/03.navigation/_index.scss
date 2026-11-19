@@ -102,12 +102,18 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 	// Phones: a closed menu is hidden; an open one drops down below the
 	// header as a full-width panel. Submenus show indented.
 	@include ui.down( medium ) {
+		// The panel sits above the Menu button: the button is about 2.75rem
+		// tall (1rem text at a 1.7 line-height, 0.5rem padding each side,
+		// plus its border) with a 1.125rem gap from the bottom of the
+		// screen. A theme that changes `--menu-toggle-padding` should set
+		// `--menu-panel-bottom` too.
+		$_menu-panel-bottom: 4.25rem;
+
 		// `top-left` moves the button before the site title.
 		order: var( --menu-toggle-order, 0 );
 
 		&__menu {
 			background: var( --color-header-background );
-			display: none;
 			padding: var( --space-s ) var( --space-l ) var( --space-l );
 			z-index: 100;
 
@@ -127,6 +133,12 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 			}
 		}
 
+		// Without the script the menu stays visible, so a phone visitor can
+		// still navigate; with it, the menu is hidden until it's opened.
+		&--ready &__menu {
+			display: none;
+		}
+
 		// With the script running, submenus stay closed until they're opened.
 		&--ready &__menu ul {
 			display: none;
@@ -138,6 +150,14 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 
 		&--open &__menu {
 			display: block;
+
+			// A tall menu can be taller than the screen: cap the panel and
+			// let it scroll, so its top items stay reachable.
+			// `--menu-panel-max-height` (set by the `top-*` positions) wins
+			// over the default, which leaves room for the Menu button below
+			// the panel.
+			max-height: var( --menu-panel-max-height, calc( 100dvh - var( --menu-panel-bottom, #{$_menu-panel-bottom} ) - var( --space-l ) ) );
+			overflow-y: auto;
 		}
 
 		// Where the Menu button sits. `chassis.json` sets these with
@@ -169,7 +189,7 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 		}
 
 		&__menu {
-			bottom: var( --menu-panel-bottom, 4.25rem );
+			bottom: var( --menu-panel-bottom, #{$_menu-panel-bottom} );
 			left: var( --menu-panel-inset, var( --space-l ) );
 			position: var( --menu-panel-position, fixed );
 			right: var( --menu-panel-inset, var( --space-l ) );
@@ -189,6 +209,7 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 			--menu-toggle-position: static;
 			--menu-panel-bottom: auto;
 			--menu-panel-inset: 0;
+			--menu-panel-max-height: calc( 100dvh - 6rem );
 			--menu-panel-position: absolute;
 			--menu-panel-top: 100%;
 			--menu-toggle-hide-offset: calc( -100% - var( --space-l ) );
@@ -201,7 +222,7 @@ $_current: '[aria-current="page"], .current-menu-item > a, .current_page_item > 
 			--menu-toggle-left: var( --space-l );
 			--menu-toggle-padding: var( --space-s ) var( --space-l );
 			--menu-toggle-position: fixed;
-			--menu-panel-bottom: 4.25rem;
+			--menu-panel-bottom: #{$_menu-panel-bottom};
 			--menu-panel-inset: var( --space-l );
 			--menu-panel-position: fixed;
 			--menu-panel-top: auto;

@@ -46,6 +46,12 @@
 			border-color: var( --color-accent );
 			color: var( --color-accent-text );
 		}
+
+		// A focused anchor sits on the accent background, so the accent
+		// outline (black by default) would disappear on it.
+		&:focus-visible {
+			outline-color: var( --color-accent-text );
+		}
 	}
 
 	&__anchor--current,

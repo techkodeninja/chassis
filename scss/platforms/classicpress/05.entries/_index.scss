@@ -42,14 +42,25 @@
 	}
 }
 
-.entry-content > :last-child {
-	margin-bottom: 0;
+.entry-content {
+	// A floated image near the end of a post stays inside the content.
+	display: flow-root;
+
+	> :last-child {
+		margin-bottom: 0;
+	}
 }
 
 .entry-footer {
 	border-top: var( --border-rule );
+	// A floated image near the end of a post doesn't escape past the footer.
+	clear: both;
 	color: var( --color-content-muted );
 	font-size: 0.875rem;
 	margin-top: var( --space-l );
 	padding-top: var( --space-m );
+}
+
+.more-link {
+	white-space: nowrap;
 }

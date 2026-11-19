@@ -96,7 +96,7 @@
 	margin-bottom: var( --comments-meta-gap );
 }
 
-.comment-moderation {
+.comment-awaiting-moderation {
 	color: var( --color-content-muted );
 	font-style: italic;
 }
@@ -111,13 +111,10 @@
 		margin-bottom: var( --space-xs );
 	}
 
-	input:not( [type='checkbox'], [type='submit'] ),
+	// The elements layer already styles these fields; the form only needs
+	// them full-width, with the same exclusion list.
+	input:not( [type='button'], [type='checkbox'], [type='file'], [type='radio'], [type='reset'], [type='submit'] ),
 	textarea {
-		background: var( --color-content-background );
-		border: var( --border-rule );
-		border-radius: var( --radius );
-		color: var( --color-content-text );
-		padding: var( --space-s );
 		width: 100%;
 	}
 

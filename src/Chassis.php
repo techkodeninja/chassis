@@ -46,9 +46,41 @@ class Chassis
 	protected $designFiles = [];
 
 	/**
+	 * The merged `chassis.json` settings, once read. Cleared when the files
+	 * change, so `design()` doesn't re-parse them on every call.
+	 *
+	 * @var array|null
+	 */
+	protected $designCache;
+
+	/**
 	 * Spacing names that `chassis.json` can use instead of CSS values.
 	 */
 	const SPACE_NAMES = [ 'xs', 's', 'm', 'l', 'l-plus', 'xl' ];
+
+	/**
+	 * The keys the older `chassis.json` shape knows, per group, from the
+	 * schema. An unknown key warns (but is still printed: the older shape is
+	 * open-ended by design, so a theme may set a custom property of its own).
+	 * `menu.design` is the exception — the schema closes that list, so
+	 * unknown keys there are skipped.
+	 */
+	const OLD_SHAPE_KEYS = [
+		'color' => [
+			'global'   => [ 'accent', 'accent-text', 'link', 'link-hover', 'page-background' ],
+			'header'   => [ 'background', 'text' ],
+			'content'  => [ 'alt', 'background', 'border', 'divider', 'heading', 'muted', 'text' ],
+			'widget'   => [ 'background', 'border', 'text', 'title' ],
+			'comments' => [ 'background', 'border' ],
+			'footer'   => [ 'background', 'text' ],
+		],
+		'font'    => [ 'body', 'code', 'heading', 'meta' ],
+		'spacing' => [ 'button-padding', 'comments-gap', 'comments-meta-gap', 'comments-padding', 'content-padding', 'entry-padding', 'header-padding', 'nav-link-padding', 'pagination-padding', 'sidebar-gap' ],
+		'width'   => [ 'medium', 'narrow', 'sidebar', 'wide' ],
+		'layout'  => [ 'medium', 'narrow', 'sidebar', 'wide' ],
+		'design'  => [ 'badge-font-size', 'badge-letter-spacing', 'badge-padding', 'badge-text-transform', 'border-box', 'border-box-bottom', 'border-width', 'button-border-width', 'button-padding', 'comments-gap', 'comments-meta-gap', 'comments-padding', 'comments-shadow', 'content-padding', 'entry-padding', 'font-size-base', 'font-size-h1', 'font-size-h2', 'font-size-h3', 'font-size-h4', 'font-size-h5', 'font-size-h6', 'font-weight-heading', 'header-padding', 'header-tagline-size', 'header-title-size', 'header-title-size-large', 'line-height-base', 'line-height-heading', 'nav-link-padding', 'pagination-padding', 'radius', 'shadow', 'sidebar-gap' ],
+		'menu.design' => [ 'background', 'border', 'padding', 'text' ],
+	];
 
 	/**
 	 * The `settings` and `styles` shape of `chassis.json`: each setting's path, the custom
@@ -183,6 +215,7 @@ class Chassis
 			'menu-toggle-position'   => 'static',
 			'menu-panel-bottom'      => 'auto',
 			'menu-panel-inset'       => '0',
+			'menu-panel-max-height'  => 'calc( 100dvh - 6rem )',
 			'menu-panel-position'    => 'absolute',
 			'menu-panel-top'         => '100%',
 			'menu-toggle-hide-offset' => 'calc( -100% - var( --space-l ) )',
@@ -196,6 +229,7 @@ class Chassis
 			'menu-toggle-position'   => 'static',
 			'menu-panel-bottom'      => 'auto',
 			'menu-panel-inset'       => '0',
+			'menu-panel-max-height'  => 'calc( 100dvh - 6rem )',
 			'menu-panel-position'    => 'absolute',
 			'menu-panel-top'         => '100%',
 			'menu-toggle-hide-offset' => 'calc( -100% - var( --space-l ) )',
@@ -268,11 +302,20 @@ class Chassis
 
 	/**
 	 * Returns the URL of a built file, or an empty string if it can't be
-	 * reached.
+	 * reached. The file must stay inside `dist/`: a path that climbs out of
+	 * it (for example `../composer.json`) is refused, so no other file can
+	 * be copied into a web-reachable folder and handed back as a URL.
 	 */
 	public function assetUrl( string $file ): string
 	{
-		if ( ! $this->asset || ! is_file( $this->distPath( $file ) ) ) {
+		if ( ! $this->asset ) {
+			return '';
+		}
+
+		$dist = realpath( $this->distPath() );
+		$path = realpath( $this->distPath( $file ) );
+
+		if ( ! $dist || ! $path || 0 !== strpos( $path, $dist . DIRECTORY_SEPARATOR ) ) {
 			return '';
 		}
 
@@ -306,15 +349,22 @@ class Chassis
 	public function designFiles( array $files ): self
 	{
 		$this->designFiles = array_values( array_filter( $files, 'is_string' ) );
+		$this->designCache = null;
 
 		return $this;
 	}
 
 	/**
-	 * Returns the merged settings from the `chassis.json` files.
+	 * Returns the merged settings from the `chassis.json` files. The files
+	 * are read once and the result kept, so calling this (or `designCss()`)
+	 * twice doesn't parse them twice.
 	 */
 	public function design(): array
 	{
+		if ( null !== $this->designCache ) {
+			return $this->designCache;
+		}
+
 		$design = [];
 
 		foreach ( array_unique( $this->designFiles ) as $file ) {
@@ -322,15 +372,40 @@ class Chassis
 				continue;
 			}
 
-			$data = json_decode( (string) file_get_contents( $file ), true );
+			if ( ! is_readable( $file ) ) {
+				trigger_error( sprintf( 'Chassis could not read %s: the file is not readable.', $file ), E_USER_WARNING );
+				continue;
+			}
+
+			$contents = file_get_contents( $file );
+
+			if ( false === $contents ) {
+				trigger_error( sprintf( 'Chassis could not read %s.', $file ), E_USER_WARNING );
+				continue;
+			}
+
+			// A UTF-8 BOM, which Windows editors add, would make the JSON fail.
+			if ( 0 === strpos( $contents, "\xEF\xBB\xBF" ) ) {
+				$contents = substr( $contents, 3 );
+			}
+
+			$data = json_decode( $contents, true );
 
 			if ( ! is_array( $data ) ) {
-				trigger_error( sprintf( 'Chassis could not read %s: %s', $file, json_last_error_msg() ), E_USER_WARNING );
+				if ( JSON_ERROR_NONE === json_last_error() ) {
+					// Valid JSON, but a scalar (`"hello"`, `42`) instead of an object.
+					trigger_error( sprintf( 'Chassis could not read %s: the file must contain a JSON object.', $file ), E_USER_WARNING );
+				} else {
+					trigger_error( sprintf( 'Chassis could not read %s: %s', $file, json_last_error_msg() ), E_USER_WARNING );
+				}
+
 				continue;
 			}
 
 			$design = array_replace_recursive( $design, $data );
 		}
+
+		$this->designCache = $design;
 
 		return $design;
 	}
@@ -357,6 +432,13 @@ class Chassis
 	 * clearer names; see `STYLES_MAP` and `stylesProperties()`. Both shapes
 	 * work, and `settings` and `styles` win where both set the same thing. Any value can be a palette color, `@slate`.
 	 *
+	 * A setting neither shape knows is skipped with a warning, and the older
+	 * shape warns about a name it doesn't style — so a typo in `chassis.json`
+	 * shows up in the error log instead of failing quietly. The older shape
+	 * still prints an unknown name's value, because it also sets custom
+	 * properties of the theme's own; only `menu.design` is closed, so an
+	 * unknown key there is skipped.
+	 *
 	 * Returns an empty string when there's nothing to set.
 	 */
 	public function designCss( ?array $design = null ): string
@@ -364,32 +446,55 @@ class Chassis
 		$design     = $design ?? $this->design();
 		$properties = [];
 
-		foreach ( $this->group( $design, 'color' ) as $group => $colors ) {
+		foreach ( $this->oldGroup( $design, 'color' ) as $group => $colors ) {
 			if ( ! is_array( $colors ) ) {
+				trigger_error( sprintf( 'Chassis skipped "color.%s" in chassis.json: it should be a list of colors.', $group ), E_USER_WARNING );
 				continue;
+			}
+
+			$known = self::OLD_SHAPE_KEYS['color'][ $group ] ?? null;
+
+			if ( null === $known ) {
+				trigger_error( sprintf( 'Chassis doesn\'t style "color.%s" in chassis.json: check the group for a typo.', $group ), E_USER_WARNING );
 			}
 
 			$prefix = 'global' === $group ? 'color-' : "color-{$group}-";
 
 			foreach ( $colors as $name => $value ) {
+				if ( null !== $known && ! in_array( $name, $known, true ) ) {
+					$this->warnUnknownOldKey( "color.{$group}.{$name}" );
+				}
+
 				$properties[ $prefix . $name ] = $value;
 			}
 		}
 
-		foreach ( $this->group( $design, 'font' ) as $name => $value ) {
+		foreach ( $this->oldGroup( $design, 'font' ) as $name => $value ) {
+			if ( ! in_array( $name, self::OLD_SHAPE_KEYS['font'], true ) ) {
+				$this->warnUnknownOldKey( "font.{$name}" );
+			}
+
 			$properties[ "font-family-{$name}" ] = $value;
 		}
 
-		foreach ( $this->group( $design, 'spacing' ) as $name => $value ) {
+		foreach ( $this->oldGroup( $design, 'spacing' ) as $name => $value ) {
+			if ( ! in_array( $name, self::OLD_SHAPE_KEYS['spacing'], true ) ) {
+				$this->warnUnknownOldKey( "spacing.{$name}" );
+			}
+
 			$properties[ $name ] = is_string( $value ) ? $this->spaceValue( $value ) : $value;
 		}
 
 		// `width` is the older name for `layout`. Both work, `layout` last so it wins.
-		foreach ( array_replace( $this->group( $design, 'width' ), $this->group( $design, 'layout' ) ) as $name => $value ) {
+		foreach ( array_replace( $this->oldGroup( $design, 'width' ), $this->oldGroup( $design, 'layout' ) ) as $name => $value ) {
+			if ( ! in_array( $name, self::OLD_SHAPE_KEYS['layout'], true ) ) {
+				$this->warnUnknownOldKey( "layout.{$name}" );
+			}
+
 			$properties[ "width-{$name}" ] = $value;
 		}
 
-		$menu   = $this->group( $design, 'menu' );
+		$menu   = $this->oldGroup( $design, 'menu' );
 		$toggle = $menu['toggle'] ?? null;
 
 		if ( null !== $toggle ) {
@@ -409,14 +514,24 @@ class Chassis
 		}
 
 		// The button's look, after the position so it wins over the presets.
-		foreach ( $this->group( $menu, 'design' ) as $name => $value ) {
+		// `menu.design` is closed by the schema, so an unknown key is skipped.
+		foreach ( $this->oldGroup( $menu, 'design' ) as $name => $value ) {
+			if ( ! in_array( $name, self::OLD_SHAPE_KEYS['menu.design'], true ) ) {
+				trigger_error( sprintf( 'Chassis skipped "menu.design.%s" in chassis.json: it isn\'t a setting.', $name ), E_USER_WARNING );
+				continue;
+			}
+
 			$name = 'text' === $name ? 'color' : $name;
 
 			$properties[ "menu-toggle-{$name}" ] = 'padding' === $name && is_string( $value ) ? $this->spaceValue( $value ) : $value;
 		}
 
 		// Last, so a theme's own settings win over the `menu.toggle` presets.
-		foreach ( $this->group( $design, 'design' ) as $name => $value ) {
+		foreach ( $this->oldGroup( $design, 'design' ) as $name => $value ) {
+			if ( ! in_array( $name, self::OLD_SHAPE_KEYS['design'], true ) ) {
+				$this->warnUnknownOldKey( "design.{$name}" );
+			}
+
 			$properties[ $name ] = $value;
 		}
 
@@ -448,6 +563,7 @@ class Chassis
 			}
 
 			if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) ) {
+				trigger_error( sprintf( 'Chassis skipped the setting "%s" in chassis.json: use a plain value.', $name ), E_USER_WARNING );
 				continue;
 			}
 
@@ -513,18 +629,28 @@ class Chassis
 			'styles.menu-button.border' => [ 'menu-toggle-border', 'var( --border-width )', 'solid', 'currentColor' ],
 		];
 
+		$palette = $this->group( $settings, 'palette' );
+
 		foreach ( $borders as $path => list( $property, $width, $style, $color ) ) {
 			$border = $this->setting( $design, $path );
 
 			if ( is_string( $border ) ) {
 				$properties[ $property ] = $border;
 			} elseif ( is_array( $border ) ) {
+				foreach ( [ 'width', 'style', 'color' ] as $part ) {
+					if ( isset( $border[ $part ] ) && ! is_string( $border[ $part ] ) ) {
+						trigger_error( sprintf( 'Chassis skipped "%s.%s" in chassis.json: use a plain value.', $path, $part ), E_USER_WARNING );
+					}
+				}
+
 				$properties[ $property ] = sprintf(
 					'%s %s %s',
-					$border['width'] ?? $width,
-					$border['style'] ?? $style,
-					$this->paletteValue( $border['color'] ?? $color )
+					isset( $border['width'] ) && is_string( $border['width'] ) ? $border['width'] : $width,
+					isset( $border['style'] ) && is_string( $border['style'] ) ? $border['style'] : $style,
+					$this->paletteValue( isset( $border['color'] ) && is_string( $border['color'] ) ? $border['color'] : $color, $palette, $color )
 				);
+			} elseif ( null !== $border ) {
+				trigger_error( sprintf( 'Chassis skipped "%s" in chassis.json: use a plain value, or a width, style, and color.', $path ), E_USER_WARNING );
 			}
 		}
 
@@ -599,11 +725,24 @@ class Chassis
 
 	/**
 	 * Turns `@slate` into `var( --palette-slate )`, for values built from parts.
-	 * Other values are kept as they are.
+	 * Other values are kept as they are. An unknown `@name` warns and falls
+	 * back, so a typo doesn't print a `var()` to a property that doesn't exist.
 	 */
-	protected function paletteValue( $value )
+	protected function paletteValue( $value, array $palette = [], $fallback = null )
 	{
-		return is_string( $value ) && 0 === strpos( trim( $value ), '@' ) ? 'var( --palette-' . substr( trim( $value ), 1 ) . ' )' : $value;
+		if ( ! is_string( $value ) || 0 !== strpos( trim( $value ), '@' ) ) {
+			return $value;
+		}
+
+		$name = substr( trim( $value ), 1 );
+
+		if ( ! array_key_exists( $name, $palette ) ) {
+			trigger_error( sprintf( 'Chassis skipped "@%s" in chassis.json: it isn\'t in settings.palette.', $name ), E_USER_WARNING );
+
+			return $fallback;
+		}
+
+		return 'var( --palette-' . $name . ' )';
 	}
 
 	/**
@@ -612,6 +751,35 @@ class Chassis
 	protected function group( array $design, string $key ): array
 	{
 		return isset( $design[ $key ] ) && is_array( $design[ $key ] ) ? $design[ $key ] : [];
+	}
+
+	/**
+	 * Returns one group from the older `chassis.json` shape, or an empty
+	 * array. A group that isn't a list warns instead of failing quietly.
+	 */
+	protected function oldGroup( array $design, string $key ): array
+	{
+		if ( ! isset( $design[ $key ] ) ) {
+			return [];
+		}
+
+		if ( ! is_array( $design[ $key ] ) ) {
+			trigger_error( sprintf( 'Chassis skipped "%s" in chassis.json: it should be a list of settings.', $key ), E_USER_WARNING );
+
+			return [];
+		}
+
+		return $design[ $key ];
+	}
+
+	/**
+	 * Warns about a key the older `chassis.json` shape doesn't style. The
+	 * value is still used: the older shape is open-ended, so a theme may set
+	 * a custom property of its own — the warning only flags a likely typo.
+	 */
+	protected function warnUnknownOldKey( string $path ): void
+	{
+		trigger_error( sprintf( 'Chassis doesn\'t style "%s" in chassis.json: check the name for a typo.', $path ), E_USER_WARNING );
 	}
 
 	/**
@@ -666,6 +834,9 @@ class Chassis
 
 	/**
 	 * Returns a button-styled link, e.g. `button( 'Download', $url, [ 'primary' ] )`.
+	 * Only safe URL schemes are kept (`http`, `https`, `mailto`, `tel`, and
+	 * relative URLs); anything else falls back to `#`, so a `javascript:` URL
+	 * never prints as a live link.
 	 *
 	 * @param string   $text      Link text.
 	 * @param string   $url       Link URL.
@@ -676,9 +847,35 @@ class Chassis
 		return sprintf(
 			'<a class="%s" href="%s">%s</a>',
 			$this->classes( 'button', $modifiers ),
-			$this->escape( $url ),
+			$this->escape( $this->safeUrl( $url ) ),
 			$this->escape( $text )
 		);
+	}
+
+	/**
+	 * Keeps a URL that is safe to print in an `href`: `#…`, `/…`, relative
+	 * URLs, and `http`, `https`, `mailto`, and `tel`. Anything else becomes
+	 * `#`, with a warning.
+	 */
+	protected function safeUrl( string $url ): string
+	{
+		$url = trim( $url );
+
+		if ( '' === $url || '#' === $url[0] || '/' === $url[0] ) {
+			return $url;
+		}
+
+		if ( ! preg_match( '/^([a-zA-Z][a-zA-Z0-9+.-]*):/', $url, $matches ) ) {
+			return $url;
+		}
+
+		if ( in_array( strtolower( $matches[1] ), [ 'http', 'https', 'mailto', 'tel' ], true ) ) {
+			return $url;
+		}
+
+		trigger_error( sprintf( 'Chassis skipped the URL "%s" in button(): use http, https, mailto, tel, or a relative URL.', $url ), E_USER_WARNING );
+
+		return '#';
 	}
 
 	/**
@@ -689,6 +886,12 @@ class Chassis
 	 */
 	public function classes( string $block, array $modifiers = [] ): string
 	{
+		$block = preg_replace( '/[^a-z0-9-]/', '', strtolower( $block ) );
+
+		if ( '' === $block ) {
+			return '';
+		}
+
 		$classes = [ $block ];
 
 		foreach ( $modifiers as $modifier ) {

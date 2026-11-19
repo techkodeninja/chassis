@@ -160,6 +160,8 @@ add_action( 'widgets_init', function () {
 
 Each widget gets the package's `widget` class, so the sidebar is styled with no extra CSS.
 
+Most Backdrop themes register providers in `app/framework.php` instead of building their own `Application` — see the [readme](../readme.md#classicpress-backdrop). Starter builds its own here so the whole setup fits in one file.
+
 ## 5. Check that it loads
 
 Open the site and view the page source. In the head you should see:
@@ -237,7 +239,7 @@ On phones, the **Menu** button floats at the bottom left and hides while you scr
 							<h2 class="entry__title">
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
 							</h2>
-							<div class="entry__meta"><?php echo esc_html( get_the_date() ); ?></div>
+							<div class="entry__metadata"><?php echo esc_html( get_the_date() ); ?></div>
 							<?php the_excerpt(); ?>
 							<a class="button" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read more', 'starter' ); ?></a>
 						</article>
@@ -262,7 +264,7 @@ On phones, the **Menu** button floats at the bottom left and hides while you scr
 
 Each class on an article comes from a different place:
 - `card` comes from the package: the dotted box, with the button pinned to the bottom.
-- `entry` is yours. It does nothing until you style it in [step 9](#9-optional-add-your-own-styles-with-sass).
+- `entry` gets the package's post box, the same box `.app-main > article` gets; the theme's own look for a post lives in [step 9](#9-optional-add-your-own-styles-with-sass).
 - `grid grid--2` comes from the package: one column on phones, two from 768px.
 
 ### `sidebar.php`: `.app-sidebar`
@@ -335,8 +337,8 @@ View the page source and you'll see this, trimmed. Every class follows the same 
 				<button class="app-nav__toggle" type="button" aria-expanded="false" aria-controls="app-nav-menu">Menu</button>
 				<ul id="app-nav-menu" class="app-nav__menu">
 					<li class="current-menu-item"><a href="/" aria-current="page">Home</a></li>
-					<li><a href="/blog">Blog</a><button class="app-nav__submenu-toggle" aria-expanded="false">▾</button>
-						<ul class="sub-menu"><li><a href="/blog/news">News</a></li></ul>
+					<li><a href="/blog">Blog</a><button class="app-nav__submenu-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="app-nav-submenu-1" aria-label="Submenu for Blog">▾</button>
+						<ul id="app-nav-submenu-1" class="sub-menu"><li><a href="/blog/news">News</a></li></ul>
 					</li>
 				</ul>
 			</nav>
@@ -348,7 +350,7 @@ View the page source and you'll see this, trimmed. Every class follows the same 
 			<div class="grid grid--2">
 				<article id="post-1" class="card entry post-1 post">
 					<h2 class="entry__title"><a href="/hello-world">Hello world</a></h2>
-					<div class="entry__meta">November 6, 2026</div>
+					<div class="entry__metadata">November 6, 2026</div>
 					<p>Welcome to your new site…</p>
 					<a class="button" href="/hello-world">Read more</a>
 				</article>
@@ -509,14 +511,10 @@ Number your folders the same way the package does (`07.components` is the compon
 			font-size: 2rem;
 		}
 	}
-
-	&__meta {
-		color: ui.color( content-muted );    // var( --color-content-muted )
-		font-size: 0.875rem;
-		margin-bottom: ui.space( m ); // var( --space-m )
-	}
 }
 ```
+
+The date under the title uses `.entry__metadata`, which the package already styles, so the theme's own styles only cover the title.
 
 Notice the split: the **package** gives you `.card`, the grid, and the breakpoints. `chassis.json` gives them your colors. The **theme** decides what a post title looks like. The tools print no CSS of their own; `ui.color()` and `ui.space()` turn into `var( --… )`, so they pick up your `chassis.json` values.
 

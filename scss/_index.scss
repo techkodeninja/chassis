@@ -8,11 +8,11 @@
 ///   01.settings    breakpoints, colors, fonts, widths, spacing     (no CSS)
 ///   02.tools       up()/down() mixins, color()/space() functions  (no CSS)
 ///   03.generics    :root custom properties, reset
-///   04.elements    bare HTML tags: body, headings, links, tables
-///   05.objects     .container, .section, .grid
+///   04.elements    bare HTML tags: body, headings, links, tables, forms
+///   05.objects     .container, .section, .grid, .gallery
 ///   06.layouts     .app, .app-header, .app-nav, .app-content, .app-footer
 ///   07.components  .card, .badge, .button, .section-header, .pagination,
-///                  .widget, .social-menu
+///                  .widget, .social-menu, .entry, .code-copy
 ///   08.utilities   .screen-reader-text, .alignwide, .hide-mobile…
 ///
 /// Each piece is a numbered folder with an `_index.scss`, like

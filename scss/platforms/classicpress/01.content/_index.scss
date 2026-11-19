@@ -19,6 +19,7 @@
 }
 
 .sticky {
+	background: var( --color-content-alt );
 	border-left: 0.25rem solid var( --color-accent );
 	padding-left: var( --space-l );
 }

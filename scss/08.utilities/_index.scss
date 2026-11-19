@@ -1,8 +1,9 @@
 ////
 /// Utilities
 ///
-/// Single-purpose helper classes. Loaded last so they win; this is the only
-/// layer that uses `!important`.
+/// Single-purpose helper classes. Loaded last so they win; utilities use
+/// `!important` so a helper always wins (the reduced-motion reset in
+/// generics does too).
 ///
 /// @group Utilities
 ////

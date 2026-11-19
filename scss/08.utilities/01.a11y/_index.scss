@@ -39,6 +39,6 @@
 	}
 }
 
-// The skip link at the top of the page. Hook for extra styles; it already
-// shows on focus through `.screen-reader-text`.
+// The skip link at the top of the page. An intentionally empty hook for
+// extra styles; it already shows on focus through `.screen-reader-text`.
 .skip-link {}

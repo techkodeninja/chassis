@@ -3,7 +3,7 @@
 Shared structure and UI building blocks for themes. One package, used the same way by **ClassicPress themes** (built on [Backdrop](https://github.com/backdrop-dev/framework)) and **[Novaris](https://github.com/novaris-dev/framework) sites**:
 
 - **SCSS:** settings, a reset, base element styles, the page skeleton (header, mobile menu, content with sidebar, footer), layout objects, components, and utilities. Your project's own build (Vite + Sass) compiles it.
-- **JS:** the mobile menu toggle.
+- **JS:** the mobile menu toggle and the Copy button on code blocks.
 - **PHP:** small helpers that print component markup, with a service provider for each framework.
 
 **New here?** [Build a theme from scratch](docs/build-a-theme.md) walks through a complete ClassicPress theme that uses every part of the package.
@@ -20,9 +20,9 @@ The numbers are the load order, the same convention as [novaris-dev/novaris](htt
 | Tools | `scss/02.tools` | `01.breakpoints`: `up()` / `down()` mixins; `02.functions`: `color()` / `space()` / `width()` | No |
 | Generics | `scss/03.generics` | `01.tokens`: `:root` custom properties; `02.resets` | Yes |
 | Elements | `scss/04.elements` | `01.defaults`, `02.headings`, `03.links`, `04.tables` | Yes |
-| Objects | `scss/05.objects` | `01.containers`, `02.sections`, `03.grids` | Yes |
+| Objects | `scss/05.objects` | `01.containers`, `02.sections`, `03.grids`, `04.galleries` | Yes |
 | Layouts | `scss/06.layouts` | `01.app`, `02.header`, `03.navigation`, `04.content`, `05.footer` | Yes |
-| Components | `scss/07.components` | `01.cards`, `02.badges`, `03.buttons`, `04.section-headers` | Yes |
+| Components | `scss/07.components` | `01.cards`, `02.badges`, `03.buttons`, `04.section-headers`, `05.pagination`, `06.widgets`, `07.social-menu`, `08.entries`, `09.code-copy` | Yes |
 | Utilities | `scss/08.utilities` | `01.a11y`, `02.alignments`, `03.display`, `04.text` | Yes |
 
 **What belongs in the package, and what stays in your theme:** the package handles structure (how the header lays out, when the menu collapses, how a grid drops to one column). Your theme handles the look (colors, fonts, the style of posts and comments, anything unique). Colors and spacing are settings, so each theme sets its own.
@@ -89,7 +89,7 @@ These are the package's Sass settings, used to build `dist/`. A theme sets the m
 | `$font-family-body`, `$font-family-heading`, `$font-family-code` | system fonts | `--font-family-*` |
 | `$font-family-meta` | the body font | `--font-family-meta` (dates and small labels) |
 | `$font-size-base`, `$line-height-base`, `$line-height-heading` | 1rem, 1.7, 1.25 | same names |
-| `$border-width` | 0.063rem | `--border-width`, `--border-dotted`, `--border-solid`, `--border-rule` |
+| `$border-width` | 0.063rem | `--border-width`, `--border-rule` |
 
 ### Colors
 
@@ -217,7 +217,7 @@ Dark themes should set `--color-content-border`, because it defaults to black.
 |---|---|
 | `.app` | Wraps the page; keeps the footer at the bottom on short pages |
 | `.app-header` (`__inner`, `__branding`, `__title`, `__tagline`) · `--full` | Branding left, menu right. Tagline hides on phones. `--full` lets the row run the full width of the screen |
-| `.app-nav` (`__toggle`, `__menu`) · `--bottom` | Phones: Menu button opens a panel below the header. `medium` and up: a row of links with dropdowns. `--bottom` moves the phone button to the bottom left, with the menu above it |
+| `.app-nav` (`__toggle`, `__menu`) · `--top` · `--bottom` | Phones: Menu button opens a panel below the header. `medium` and up: a row of links with dropdowns. The button sits at the bottom left by default (`.app-nav--bottom` re-asserts it); `--top` puts the button in the header, with the menu below it |
 | `.app-content` · `--sidebar-right` · `--sidebar-left` | Content area; the sidebar sits beside the main column from `large` up and stacks below it before that |
 | `.app-main`, `.app-sidebar` | The two columns |
 | `.app-footer` (`__inner`, `__credit`) | Footer band |
@@ -260,7 +260,7 @@ Themes without `chassis.json` can use the `.app-nav--top` or `.app-nav--bottom` 
 | `.pagination` (`__items`, `__item`, `__anchor`) | Numbered page links. Novaris's default `pagination-items` classes work too |
 | `.widget`, `.widget-title` | Sidebar boxes, as printed by Novaris and ClassicPress |
 | `.code-copy` | The Copy button added to code blocks in post content |
-| `.app-main > article`, `.entry__header`, `__metadata`, `__title`, `__title-anchor`, `__thumbnail`, `__content`, `__more-link`, `__terms` | Posts and pages, in a box that matches the widgets |
+| `.entry`, `.app-main > article`, `.entry__header`, `__metadata`, `__title`, `__title-anchor`, `__thumbnail`, `__content`, `__more-link`, `__terms` | Posts and pages, in a box that matches the widgets |
 | `.social-menu` | A row of icon links |
 
 ```html
@@ -299,7 +299,7 @@ It covers captions, sticky posts, threaded comments and the comment form (in a b
 
 ## JavaScript
 
-`dist/chassis.js` runs the mobile menu and the Copy button on code blocks, and the service provider loads it. The menu toggles `.app-nav--open` and `aria-expanded`, closes on Escape (returning focus to the button), on a click outside, and when the screen widens past the mobile breakpoint. Links with a submenu get a button that opens it, which helps on touch screens.
+`dist/chassis.js` runs the mobile menu and the Copy button on code blocks, and the service provider loads it. The menu toggles `.app-nav--open` and `aria-expanded`, closes on Escape (returning focus to the button), on a click outside, on tabbing out, and when the screen widens past the mobile breakpoint. Links with a submenu get a button that opens it, which helps on touch screens. Code blocks in post content get a Copy button that stays at the top of the block while the code scrolls; it works on plain `http://` pages too, falling back to a temporary textarea when the clipboard API isn't available.
 
 ## Turning Chassis on
 
@@ -421,7 +421,7 @@ How it reads:
 | `badge` | `.badge` | Badges |
 | `footer` | `.app-footer` | The bottom bar |
 
-The schema lists every setting, with the custom property it sets, so an editor autocompletes them and flags typos. Chassis also skips an unknown setting with a warning. `settings.custom` sets any other custom property by its own name, like `design` in the older shape.
+The schema lists every setting, with the custom property it sets, so an editor autocompletes them and flags typos. Chassis also skips an unknown setting with a warning — in the older shape too, so a typo in `color`, `spacing`, `design` or `menu.design` warns the same way. Skipped settings emit a PHP warning by design, so they show up in the error log; the page still renders with the default. `settings.custom` sets any other custom property by its own name, like `design` in the older shape.
 
 Both shapes work, in the same file or across a parent and child theme. Where both set the same thing, `settings` and `styles` win. They cover everything the older shape can set, and new settings will be added to them only.
 
@@ -538,6 +538,15 @@ To host the files yourself instead, download a release from [GitHub](https://git
 | `badge( $text, $modifiers = [] )` | `<span class="badge …">` |
 | `button( $text, $url, $modifiers = [] )` | `<a class="button …">` |
 | `classes( $block, $modifiers = [] )` | `'button button--primary'` |
+| `styles()` | The `<link>` tags for the CSS, plus the design from `chassis.json` as custom properties |
+| `scripts()` | The `<script>` tag for `chassis.js` |
+| `path( $append = '' )`, `distPath( $append = '' )` | Paths to the package root and its `dist/` folder |
+| `assetUrl( $file )` | The URL for a file in `dist/`, with a hash so browsers pick up new versions |
+| `designFiles( $files )` | The `chassis.json` files in use, in order |
+| `design()` | The merged design from the `chassis.json` files |
+| `designCss( $design = null )` | The design as a `<style>` block of custom properties |
+| `platform()` | `'novaris'`, `'backdrop'`, or `'plain'` |
+| `standalone( $folder, $url, $design = [] )` | A `Chassis` instance without a framework (static) |
 | `scssPath( $append = '' )`, `jsPath( $append = '' )` | Paths to the package's SCSS and JS |
 
 Text and URLs are escaped for you.

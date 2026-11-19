@@ -43,18 +43,30 @@ class Publisher
 
 	/**
 	 * Copies a file from `dist/` if needed, and returns its URL. Returns an
-	 * empty string if it can't be copied.
+	 * empty string if it can't be copied. The file must stay inside `dist/`:
+	 * a path that climbs out of it (for example `../composer.json`) is
+	 * refused, so no other file can be copied into a web-reachable folder
+	 * and handed back as a URL.
 	 */
 	public function __invoke( string $file ): string
 	{
-		$source = dirname( __DIR__ ) . '/dist/' . ltrim( $file, '/' );
+		$dist = realpath( dirname( __DIR__ ) . '/dist' );
 
-		if ( ! is_file( $source ) ) {
+		if ( ! $dist ) {
 			return '';
 		}
 
-		$info   = pathinfo( $file );
-		$name   = sprintf( '%s-%s.%s', $info['filename'], substr( md5_file( $source ), 0, 8 ), $info['extension'] );
+		$source = realpath( $dist . '/' . ltrim( $file, '/' ) );
+
+		if ( ! $source || 0 !== strpos( $source, $dist . DIRECTORY_SEPARATOR ) ) {
+			return '';
+		}
+
+		$info      = pathinfo( $file );
+		$extension = $info['extension'] ?? '';
+		$name      = '' !== $extension
+			? sprintf( '%s-%s.%s', $info['filename'], substr( md5_file( $source ), 0, 8 ), $extension )
+			: sprintf( '%s-%s', $info['filename'], substr( md5_file( $source ), 0, 8 ) );
 		$target = $this->folder . '/' . $name;
 
 		if ( ! is_file( $target ) ) {
@@ -62,7 +74,7 @@ class Publisher
 				return '';
 			}
 
-			$this->removeOldCopies( $info['filename'], $info['extension'], $name );
+			$this->removeOldCopies( $info['filename'], $extension, $name );
 		}
 
 		return $this->url . '/' . $name;
@@ -92,7 +104,9 @@ class Publisher
 	 */
 	protected function removeOldCopies( string $filename, string $extension, string $keep ): void
 	{
-		$pattern = sprintf( '/^%s-[0-9a-f]{8}\.%s$/', preg_quote( $filename, '/' ), preg_quote( $extension, '/' ) );
+		$pattern = '' !== $extension
+			? sprintf( '/^%s-[0-9a-f]{8}\.%s$/', preg_quote( $filename, '/' ), preg_quote( $extension, '/' ) )
+			: sprintf( '/^%s-[0-9a-f]{8}$/', preg_quote( $filename, '/' ) );
 
 		foreach ( scandir( $this->folder ) ?: [] as $file ) {
 			if ( $file !== $keep && preg_match( $pattern, $file ) ) {

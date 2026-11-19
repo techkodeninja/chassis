@@ -48,18 +48,23 @@ class Backdrop extends ServiceProvider
 
 	/**
 	 * Adds the stylesheets, the `chassis.json` settings, and the script. They
-	 * load early, so the theme's own stylesheet comes after them.
+	 * load early, so the theme's own stylesheet comes after them. The
+	 * ClassicPress add-on only loads when the core stylesheet did: without it
+	 * the add-on would enqueue with an unregistered dependency.
 	 */
 	public function enqueue(): void
 	{
 		$chassis = $this->app->resolve( Chassis::class );
 
-		foreach ( [ 'chassis' => 'chassis.css', 'chassis-classicpress' => 'chassis-classicpress.css' ] as $handle => $file ) {
-			$url = $chassis->assetUrl( $file );
+		$core = false;
 
-			if ( $url ) {
-				wp_enqueue_style( $handle, $url, 'chassis' === $handle ? [] : [ 'chassis' ], $this->version( $chassis, $file ) );
-			}
+		if ( $url = $chassis->assetUrl( 'chassis.css' ) ) {
+			wp_enqueue_style( 'chassis', $url, [], $this->version( $chassis, 'chassis.css' ) );
+			$core = true;
+		}
+
+		if ( $core && ( $url = $chassis->assetUrl( 'chassis-classicpress.css' ) ) ) {
+			wp_enqueue_style( 'chassis-classicpress', $url, [ 'chassis' ], $this->version( $chassis, 'chassis-classicpress.css' ) );
 		}
 
 		if ( wp_style_is( 'chassis', 'enqueued' ) && ( $design = $chassis->designCss() ) ) {
@@ -87,7 +92,9 @@ class Backdrop extends ServiceProvider
 
 	/**
 	 * Returns the URL of a file in `dist/`. The package sits inside the theme's
-	 * `vendor` folder, so its URL comes from the theme's URL.
+	 * `vendor` folder, so its URL comes from the theme's URL. Returns an empty
+	 * string — with a warning — when the file can't be mapped to a theme
+	 * folder, so a site doesn't load with no Chassis CSS and no diagnostic.
 	 */
 	public function url( string $file ): string
 	{
@@ -100,6 +107,8 @@ class Backdrop extends ServiceProvider
 				return trailingslashit( $uri ) . substr( $path, strlen( $dir ) );
 			}
 		}
+
+		trigger_error( sprintf( 'Chassis could not map %s to a theme URL: the package may be installed outside the theme.', $file ), E_USER_WARNING );
 
 		return '';
 	}

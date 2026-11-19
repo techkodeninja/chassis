@@ -19,3 +19,13 @@ a {
 	outline: 0.125rem solid var( --color-accent );
 	outline-offset: 0.125rem;
 }
+
+// On dark surfaces the accent outline (black by default) disappears, so use
+// the surface's own text color there instead.
+.app-header :focus-visible {
+	outline-color: var( --color-header-text );
+}
+
+.app-footer :focus-visible {
+	outline-color: var( --color-footer-text );
+}
