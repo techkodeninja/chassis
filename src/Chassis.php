@@ -21,7 +21,7 @@ class Chassis
 	/**
 	 * Package version.
 	 */
-	const VERSION = '0.1.8';
+	const VERSION = '0.1.9';
 
 	/**
 	 * The platform this was created for: `novaris`, `backdrop`, or `plain`.
