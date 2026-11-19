@@ -2,7 +2,7 @@
 
 All notable changes to Chassis will be documented in this file.
 
-## [Unreleased]
+## [0.1.9] - 2026-11-19
 
 ### Fixed
 
@@ -27,7 +27,7 @@ All notable changes to Chassis will be documented in this file.
 - `.entry` is now a real hook: the post box styles apply to `.entry` as well as `.app-main > article`.
 - The "Read more" link doesn't wrap mid-phrase.
 - `--menu-hide-on-scroll` is now defined in the tokens (`1` by default), instead of only existing when PHP emits it.
-- The built files carry a version banner (`/*! Chassis 0.1.8 | … */`).
+- The built files carry a version banner (`/*! Chassis 0.1.9 | … */`).
 - `package-lock.json` is committed, so installs are reproducible; CI uses `npm ci`.
 
 ### Changed
@@ -47,7 +47,7 @@ All notable changes to Chassis will be documented in this file.
 ### Added
 
 - `npm run check` runs `check:version` and `check:schema`: `scripts/check-version.mjs` verifies `Chassis::VERSION`, `package.json`, the readme's jsDelivr links, and the changelog's newest entry all agree; `scripts/check-schema.mjs` checks the schema is well-formed, that every `settings`/`styles` leaf is in `STYLES_MAP` or handled, and that the `chassis.json` examples in the docs only use settings the schema knows.
-- The workflow changes for these checks and for the dist build's concurrency control are in the pull request body, for a direct push — the GitHub App can't modify workflow files.
+- The checks run in CI (a `check` job: PHP 7.4 `php -l`, `npm ci`, `npm run check`), and the dist build is serialized so two pushes can't race the bot's commit.
 
 ## [0.1.8] - 2026-11-08
 
