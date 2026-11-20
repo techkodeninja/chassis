@@ -1,0 +1,62 @@
+////
+/// Search panel
+///
+/// A header search toggle button and the slide-down panel it opens. Pairs
+/// with `js/search-panel.js`, which toggles `.search-box--open` on the
+/// panel, `.search-toggle--active` on the button, and keeps
+/// `aria-expanded` in sync.
+///
+///   <button class="search-toggle" type="button" aria-controls="search-container" aria-expanded="false">…</button>
+///   <div class="search-box" id="search-container">
+///     <div class="search-box__inner">…search form…</div>
+///   </div>
+///
+/// @group Components
+////
+
+// The panel. Hidden until the toggle opens it.
+.search-box {
+	display: none;
+	margin: 0 auto var( --space-s );
+	max-width: var( --width-wide );
+
+	&--open {
+		display: block;
+	}
+}
+
+// The panel itself. The form inside aligns to the right.
+.search-box__inner {
+	background: var( --color-header-background );
+	display: flex;
+	justify-content: flex-end;
+	padding: var( --space-s );
+
+	// The field is a fixed width, not full-width like a sidebar search.
+	.search-field {
+		max-width: 100%;
+		width: 250px;
+	}
+}
+
+// The toggle. A plain button with the default chrome removed; its icon
+// shares the social menu's icon size, so the two sit level in a top bar.
+.search-toggle {
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	float: right;
+	font-size: 1rem;
+	line-height: var( --line-height-base );
+	padding: var( --space-s );
+	position: relative;
+	text-align: center;
+
+	.icon {
+		height: var( --social-icon-size );
+		stroke-width: 2;
+		vertical-align: middle;
+		width: var( --social-icon-size );
+	}
+}

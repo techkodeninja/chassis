@@ -18,6 +18,20 @@
 	margin-top: var( --space-s );
 }
 
+// A captioned image fills its caption and centers in it. (`display: block`
+// is already in the reset; the centering is the part that belongs here.)
+.wp-caption img[class*='wp-image-'] {
+	display: block;
+	margin: 0 auto;
+	width: 100%;
+}
+
+// The `wp_link_pages()` links (`Pages: 1 2`) clear floated images inside
+// the content, so they sit below the text instead of beside it.
+.post-nav-links {
+	clear: both;
+}
+
 .sticky {
 	background: var( --color-content-alt );
 	border-left: 0.25rem solid var( --color-accent );

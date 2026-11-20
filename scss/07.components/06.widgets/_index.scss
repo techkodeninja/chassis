@@ -35,6 +35,11 @@
 	li + li {
 		margin-top: var( --space-xs );
 	}
+
+	// Nested lists indent, so child items read as children.
+	li li {
+		margin-left: 18px;
+	}
 }
 
 .widget__title {

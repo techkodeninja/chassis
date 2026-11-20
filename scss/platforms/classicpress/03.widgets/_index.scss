@@ -25,13 +25,28 @@
 	width: 100%;
 }
 
-.search-submit {
+// Scoped to the form: the bare `input[type='submit']` rule in
+// `04.elements/05.forms` (0,1,1) would otherwise beat this single class
+// (0,1,0) and turn the accent submit into a plain button.
+.search-form .search-submit {
 	background: var( --color-accent );
 	border: var( --button-border-width ) solid var( --color-accent );
 	border-radius: var( --radius );
 	color: var( --color-accent-text );
 	cursor: pointer;
 	padding: var( --space-s ) var( --space-m );
+}
+
+// RSS widget: the feed title and date each take their own line.
+.rsswidget {
+	display: block;
+}
+
+.rss-date {
+	display: block;
+	font-weight: bold;
+	margin-top: 20px;
+	text-align: left;
 }
 
 .widget_calendar {

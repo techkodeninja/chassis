@@ -154,6 +154,10 @@ class Chassis
 		// `primary-menu`: `.app-nav`.
 		'styles.primary-menu.link.spacing.padding' => [ 'nav-link-padding', true ],
 
+		// `social-menu`: `.social-menu`.
+		'styles.social-menu.alignment'            => [ 'social-menu-alignment', false ],
+		'styles.social-menu.icon.size'            => [ 'social-icon-size', true ],
+
 		// `menu-button`: `.app-nav__toggle`.
 		'styles.menu-button.color.background'      => [ 'menu-toggle-background', false ],
 		'styles.menu-button.color.text'            => [ 'menu-toggle-color', false ],

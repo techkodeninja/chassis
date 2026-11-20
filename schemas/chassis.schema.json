@@ -645,6 +645,36 @@
 					},
 					"additionalProperties": false
 				},
+				"social-menu": {
+					"type": "object",
+					"description": "The row of social links. BEM block `.social-menu`.",
+					"properties": {
+						"alignment": {
+							"type": "string",
+							"enum": [
+								"flex-start",
+								"center",
+								"flex-end"
+							],
+							"description": "Where the row sits. `--social-menu-alignment`. `flex-start` is left, `center` is the default, `flex-end` is right."
+						},
+						"icon": {
+							"type": "object",
+							"description": "Its icons.",
+							"properties": {
+								"size": {
+									"type": [
+										"string",
+										"number"
+									],
+									"description": "The icon height and width. `--social-icon-size`. Size names (`xs`, `s`, `m`, `l`, `l-plus`, `xl`) or CSS, e.g. `18px`."
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false
+				},
 				"menu-button": {
 					"type": "object",
 					"description": "The button that opens the primary menu on phones. BEM element `.app-nav__toggle`.",

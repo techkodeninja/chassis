@@ -44,10 +44,74 @@ hr {
 	margin: var( --space-xl ) 0;
 }
 
+// Prevent `sub` and `sup` elements from affecting the line height.
+sub,
+sup {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+sup {
+	top: -0.5em;
+}
+
+small {
+	font-size: 80%;
+}
+
+progress {
+	vertical-align: baseline;
+}
+
+// Highlighted and inserted text keep the standard pale-yellow mark.
+mark,
+ins {
+	background: #fff9c0;
+	text-decoration: none;
+}
+
+// Abbreviations get a dotted underline and a help cursor.
+abbr,
+acronym {
+	border-bottom: 1px dotted var( --color-content-muted );
+	cursor: help;
+}
+
+address {
+	margin: 0 0 var( --space-l-plus );
+}
+
+// Definition terms get a paragraph-sized top margin and a smaller gap below.
+dt {
+	margin: var( --space-l ) 0 var( --space-s );
+}
+
+// No generated quote marks: a theme that wants them styles them itself.
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+	content: '';
+}
+
+blockquote,
+q {
+	quotes: '' '';
+}
+
+
 code,
 kbd,
 pre,
-samp {
+samp,
+tt,
+var {
 	font-family: var( --font-family-code );
 	font-size: 0.9em;
 }

@@ -42,6 +42,10 @@ $badge-letter-spacing: 0.08em !default;
 $badge-padding:        0.2rem 0.6rem !default;
 $badge-text-transform: uppercase !default;
 
+// Social menu.
+$social-icon-size:      1.5rem !default; // the icon height and width
+$social-menu-alignment: center !default; // where the icon row sits
+
 // Pagination.
 $pagination-padding: var( --space-xs ) var( --space-m ) !default;
 

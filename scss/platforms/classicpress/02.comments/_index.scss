@@ -74,6 +74,27 @@
 	padding-bottom: var( --space-l );
 }
 
+// The previous/next navigation between comment pages, when comments are
+// paginated. The previous link floats left, the next floats right.
+.comments-area__navigation {
+	border-top: var( --border-rule );
+	border-bottom: var( --border-rule );
+
+	.icon {
+		margin: 0 var( --space-s );
+	}
+}
+
+.comments-area__previous {
+	float: left;
+	padding: var( --space-s ) 0;
+}
+
+.comments-area__next {
+	float: right;
+	padding: var( --space-s ) 0;
+}
+
 .bypostauthor > .comment-body {
 	background: var( --color-content-alt );
 	border-bottom: 0;

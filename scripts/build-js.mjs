@@ -18,7 +18,7 @@ const read = ( file ) => readFileSync( new URL( `../js/${ file }`, import.meta.u
 	.replace( /^export function/m, 'function' )
 	.trim();
 
-const source = [ 'app-nav.js', 'code-copy.js' ].map( read ).join( '\n\n' );
+const source = [ 'app-nav.js', 'code-copy.js', 'search-panel.js' ].map( read ).join( '\n\n' );
 
 mkdirSync( new URL( '../dist/', import.meta.url ), { recursive: true } );
 
@@ -26,7 +26,7 @@ const out = new URL( '../dist/chassis.js', import.meta.url );
 
 writeFileSync(
 	out,
-	`${ banner }\n( function () {\n${ source }\n\nappNav();\ncodeCopy();\n} )();\n`
+	`${ banner }\n( function () {\n${ source }\n\nappNav();\ncodeCopy();\nsearchPanel();\n} )();\n`
 );
 
 // Parse the result: a stray `export` or `import` in `js/` would otherwise
