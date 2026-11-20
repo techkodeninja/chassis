@@ -45,6 +45,14 @@ select {
 	font: inherit;
 }
 
+// Remove the margin in Firefox and Safari.
+button,
+input,
+select,
+textarea {
+	margin: 0;
+}
+
 @media ( prefers-reduced-motion: reduce ) {
 	*,
 	*::before,

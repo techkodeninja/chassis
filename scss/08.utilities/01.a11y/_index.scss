@@ -42,3 +42,9 @@
 // The skip link at the top of the page. An intentionally empty hook for
 // extra styles; it already shows on focus through `.screen-reader-text`.
 .skip-link {}
+
+// A skip link's target takes focus without showing an outline around the
+// whole content area.
+[tabindex='-1']:focus {
+	outline: 0;
+}
