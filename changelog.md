@@ -2,6 +2,22 @@
 
 All notable changes to Chassis will be documented in this file.
 
+## [0.2.1] - 2026-11-19
+
+### Added
+
+- Bare `button` (and `input[type=button|reset|submit]`) element styling, token-driven with a dark accent hover. Chassis previously styled only the `.button` class, so every theme had to write its own button base.
+- A search-panel component (`.search-box`, `.search-box__inner`, `.search-toggle`) with vanilla JavaScript (`js/search-panel.js`): the toggle opens the panel, focuses the field, and Escape closes it. No jQuery needed.
+- Social-menu tokens: `--social-icon-size` (default `1.5rem`, `styles.social-menu.icon.size`) and `--social-menu-alignment` (default `center`, `styles.social-menu.alignment`).
+- Form-control normalization: `fieldset`/`legend`, `optgroup`, `button, select { text-transform: none }`, `::-moz-focus-inner` / `:-moz-focusring`, number spin buttons, search cancel button and decoration, modern `::placeholder`, and the file-upload button.
+- Element defaults: `sub`/`sup` line-height, `small`, `progress`, `mark`/`ins`, `abbr`/`acronym`, `address`, `tt`/`var` (added to the code selector), and `blockquote`/`q` quote neutralization.
+- Widget nested-list indent (`.widget li li`) and RSS widget styles (`.rsswidget`, `.rss-date`).
+- The comment pagination nav pattern.
+- The caption image rule (`.wp-caption img` is centered and full-width).
+- The skip-link target (`[tabindex="-1"]:focus { outline: 0 }`).
+- An input `:focus` color, reusing `--color-content-heading`.
+- `.post-nav-links { clear: both }` and `dt` spacing.
+
 ## [0.2.0] - 2026-11-19
 
 ### Changed
