@@ -54,6 +54,14 @@ class Chassis
 	protected $designCache;
 
 	/**
+	 * Values set from code, by dotted path (`styles.color.accent`). They are
+	 * merged over the `chassis.json` files; see `overrides()`.
+	 *
+	 * @var array
+	 */
+	protected $overrides = [];
+
+	/**
 	 * Spacing names that `chassis.json` can use instead of CSS values.
 	 */
 	const SPACE_NAMES = [ 'xs', 's', 'm', 'l', 'l-plus', 'xl' ];
@@ -359,6 +367,84 @@ class Chassis
 	}
 
 	/**
+	 * Returns the settings that `chassis.json` can set, as `STYLES_MAP` has
+	 * them: a dotted path (`styles.color.accent`) to `[ custom property,
+	 * is spacing ]`. A customizer or settings page can use this to know which
+	 * paths exist and which custom property each one sets.
+	 */
+	public static function stylesMap(): array
+	{
+		return self::STYLES_MAP;
+	}
+
+	/**
+	 * Sets values from code, by the dotted paths in `stylesMap()`, for example
+	 * `[ 'styles.color.accent' => '#cc3300' ]`. They are merged over the
+	 * `chassis.json` files, so a customizer can change a design without
+	 * editing the file. Calling this again replaces the earlier values.
+	 *
+	 * A path that isn't in `stylesMap()` is skipped with a warning, and so is
+	 * a value that isn't a string or number. An empty value is skipped
+	 * without a warning: it means "use the file's value".
+	 *
+	 * @param array $values Dotted path => value.
+	 */
+	public function overrides( array $values ): self
+	{
+		$this->overrides = [];
+
+		foreach ( $values as $path => $value ) {
+			if ( ! isset( self::STYLES_MAP[ $path ] ) ) {
+				trigger_error( sprintf( 'Chassis skipped the override "%s": it isn\'t a setting.', $path ), E_USER_WARNING );
+				continue;
+			}
+
+			if ( null === $value || '' === $value ) {
+				continue;
+			}
+
+			if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) ) {
+				trigger_error( sprintf( 'Chassis skipped the override "%s": use a plain value.', $path ), E_USER_WARNING );
+				continue;
+			}
+
+			$this->overrides[ $path ] = (string) $value;
+		}
+
+		$this->designCache = null;
+
+		return $this;
+	}
+
+	/**
+	 * Returns the value a setting has now, from the `chassis.json` files and
+	 * any `overrides()`, for the dotted path in `stylesMap()`. A palette
+	 * color (`@slate`) is returned as the color it stands for. Returns null
+	 * when nothing sets it, so the caller can use Chassis's own default.
+	 *
+	 * @param string $path Dotted path, like `styles.color.accent`.
+	 * @return string|null
+	 */
+	public function value( string $path ): ?string
+	{
+		$value = $this->setting( $this->design(), $path );
+
+		if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) ) {
+			return null;
+		}
+
+		$value = trim( (string) $value );
+
+		if ( 0 === strpos( $value, '@' ) ) {
+			$palette = $this->setting( $this->design(), 'settings.palette.' . substr( $value, 1 ) );
+
+			return is_string( $palette ) ? $palette : null;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Returns the merged settings from the `chassis.json` files. The files
 	 * are read once and the result kept, so calling this (or `designCss()`)
 	 * twice doesn't parse them twice.
@@ -407,6 +493,11 @@ class Chassis
 			}
 
 			$design = array_replace_recursive( $design, $data );
+		}
+
+		// Values set from code win over the files.
+		foreach ( $this->overrides as $path => $value ) {
+			$design = array_replace_recursive( $design, $this->nest( $path, $value ) );
 		}
 
 		$this->designCache = $design;
@@ -688,6 +779,21 @@ class Chassis
 		}
 
 		return $properties;
+	}
+
+	/**
+	 * Turns a dotted path and a value into nested arrays:
+	 * `styles.color.accent` becomes `[ 'styles' => [ 'color' => [ 'accent' => $value ] ] ]`.
+	 */
+	protected function nest( string $path, $value ): array
+	{
+		$nested = $value;
+
+		foreach ( array_reverse( explode( '.', $path ) ) as $key ) {
+			$nested = [ $key => $nested ];
+		}
+
+		return $nested;
 	}
 
 	/**

@@ -322,7 +322,7 @@ Then print the files in the theme's views, with `styles()` before the theme's ow
 
 The provider copies the built files into `public/assets/chassis`, because browsers can't reach `vendor`. If it can't write there, it logs a warning and prints nothing.
 
-**ClassicPress.** Register `Providers\Backdrop` in the theme's `app/framework.php`. It loads the CSS, the ClassicPress add-on, the theme's `chassis.json`, and the JavaScript for you.
+**ClassicPress.** Register `Providers\Backdrop` in the theme's `app/framework.php`. It loads the CSS, the ClassicPress add-on, the theme's `chassis.json`, and the JavaScript for you. It also applies the `chassis/overrides` filter before printing the design: return `[ 'styles.color.accent' => '#cc3300' ]` (any path from `Chassis::stylesMap()`) and the value wins over `chassis.json`. The customizer in `backdrop-dev/customize` uses this for its Colors, Typography and Background sections.
 
 ### Set the design with `chassis.json`
 
@@ -545,6 +545,9 @@ To host the files yourself instead, download a release from [GitHub](https://git
 | `designFiles( $files )` | The `chassis.json` files in use, in order |
 | `design()` | The merged design from the `chassis.json` files |
 | `designCss( $design = null )` | The design as a `<style>` block of custom properties |
+| `overrides( $values )` | Set values from code by dotted path (`'styles.color.accent' => '#cc3300'`); they win over `chassis.json` |
+| `value( $path )` | The value a setting has now (files plus overrides), or `null`; a palette color comes back as its color |
+| `stylesMap()` | The settings `chassis.json` can set: dotted path to `[ custom property, is spacing ]` (static) |
 | `platform()` | `'novaris'`, `'backdrop'`, or `'plain'` |
 | `standalone( $folder, $url, $design = [] )` | A `Chassis` instance without a framework (static) |
 | `scssPath( $append = '' )`, `jsPath( $append = '' )` | Paths to the package's SCSS and JS |

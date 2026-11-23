@@ -67,6 +67,10 @@ class Backdrop extends ServiceProvider
 			wp_enqueue_style( 'chassis-classicpress', $url, [ 'chassis' ], $this->version( $chassis, 'chassis-classicpress.css' ) );
 		}
 
+		// Values from code, such as the customizer, win over `chassis.json`: a theme or a
+		// package returns `[ 'styles.color.accent' => '#cc3300' ]` from `chassis/overrides`.
+		$chassis->overrides( (array) apply_filters( 'chassis/overrides', [] ) );
+
 		if ( wp_style_is( 'chassis', 'enqueued' ) && ( $design = $chassis->designCss() ) ) {
 			wp_add_inline_style( 'chassis', $design );
 		}

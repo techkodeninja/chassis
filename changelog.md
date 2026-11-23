@@ -2,6 +2,15 @@
 
 All notable changes to Chassis will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `Chassis::overrides()` sets values from code by the dotted paths in `STYLES_MAP`, merged over the `chassis.json` files, so a customizer can change the design without editing the file. A path that isn't in the map, or a value that isn't a plain value, is skipped with a warning; an empty value means "use the file's value".
+- `Chassis::value()` returns the value a setting has now (files plus overrides), with a palette color (`@slate`) resolved, or `null` when nothing sets it.
+- `Chassis::stylesMap()` returns `STYLES_MAP`, so other packages can see which paths exist and which custom property each sets.
+- `Providers\Backdrop` applies the `chassis/overrides` filter before it prints the design.
+
 ## [0.2.2] - 2026-11-23
 
 ### Fixed
