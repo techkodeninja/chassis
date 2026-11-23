@@ -6,8 +6,8 @@
 /// callbacks print (a `.comment-meta` header and a `.comment-content` body).
 ///
 /// The `.comment-body`, `.comment-meta`, `.comment-metadata`, `.comment-content`, and
-/// `.comment-awaiting-moderation` classes are the ones WordPress's default walker prints,
-/// so they stay exactly as WordPress spells them; only the classes Chassis itself owns
+/// `.comment-awaiting-moderation` classes are the ones ClassicPress's default walker prints,
+/// so they stay exactly as ClassicPress spells them; only the classes Chassis itself owns
 /// are BEM.
 ///
 /// @group Platforms

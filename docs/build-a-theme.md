@@ -45,11 +45,11 @@ In `wp-content/themes/`, make a folder called `starter` and add `style.css`. Cla
 ```json
 {
 	"name": "you/starter",
-	"type": "wordpress-theme",
+	"type": "classicpress-theme",
 	"require": {
 		"php": ">=7.4",
-		"backdrop-dev/framework": "dev-develop",
-		"techkodeninja/chassis": "^0.1"
+		"backdrop-dev/framework": "^1.0.1",
+		"techkodeninja/chassis": "^0.2.0"
 	}
 }
 ```

@@ -2,6 +2,13 @@
 
 All notable changes to Chassis will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- `docs/build-a-theme.md` is ClassicPress-only: the example `composer.json` uses the `classicpress-theme` type, and requires Backdrop `^1.0.1` and Chassis `^0.2.0` instead of `dev-develop` and `^0.1`.
+- A source comment in the ClassicPress comments styles says ClassicPress where it said WordPress.
+
 ## [0.2.1] - 2026-11-19
 
 ### Added
