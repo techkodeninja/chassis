@@ -31,8 +31,15 @@
 
 	svg {
 		display: block;
-		fill: currentColor;
 		height: var( --social-icon-size );
 		width: var( --social-icon-size );
+
+		// Only fill icons that aren't stroke icons. Stroke icons
+		// (e.g. Iconoir) carry `fill="none"` and draw with
+		// `stroke="currentColor"`; forcing a fill turns their closed
+		// outline paths (LinkedIn, Instagram) into solid squares.
+		&:not( [fill="none"] ) {
+			fill: currentColor;
+		}
 	}
 }
