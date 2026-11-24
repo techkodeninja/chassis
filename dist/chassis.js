@@ -1,4 +1,4 @@
-/*! Chassis 0.2.3 | GPL-2.0-or-later | https://github.com/techkodeninja/chassis */
+/*! Chassis 0.2.4 | GPL-2.0-or-later | https://github.com/techkodeninja/chassis */
 ( function () {
 /**
  * App navigation
