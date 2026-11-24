@@ -2,6 +2,12 @@
 
 All notable changes to Chassis will be documented in this file.
 
+## [0.2.4] - 2026-11-24
+
+### Fixed
+
+- The social menu no longer forces a fill on stroke icons: `.social-menu svg` only applies `fill: currentColor` to icons without a `fill="none"` attribute. Stroke icons (Iconoir) draw with `stroke="currentColor"` instead, so LinkedIn and Instagram render as their icons rather than solid squares. Fill-based icons are unchanged.
+
 ## [0.2.3] - 2026-11-23
 
 ### Added
